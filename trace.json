@@ -1,0 +1,316 @@
+{
+  "events": [
+    {
+      "name": "pipeline.start",
+      "payload": {
+        "timestamp": "2026-02-04T10:20:18.447792",
+        "utterance": "query information about this book"
+      },
+      "timestamp": "2026-02-04T10:20:18.447901Z"
+    },
+    {
+      "name": "intentgpt.structured_text",
+      "payload": {
+        "audio": {
+          "sound_classification": {
+            "likely_event": "",
+            "top3": []
+          },
+          "speech": {
+            "confidence": 0.95,
+            "text": "The current speech recognition result is 'Query information about this book.', with a confidence level of 0.95.",
+            "transcript": "Query information about this book."
+          },
+          "volume": {
+            "decibels": null,
+            "text": "The environmental volume is approximately unknown decibels.",
+            "voiced_ratio": null
+          }
+        },
+        "credibility_report": {
+          "attention_hint": "Prioritize auditory/speech information over visual details due to low visual credibility.",
+          "report": "Visual incredible; Voice credible.",
+          "visual": {
+            "brightness": 0.0,
+            "credible": false,
+            "reason": "Brightness 0.000 < 0.15 (too dark)."
+          },
+          "voice": {
+            "credible": true,
+            "reason": "Speech confidence 0.95 >= 0.70.",
+            "speech_confidence": 0.95
+          }
+        },
+        "history_retrieval": [],
+        "history_summary": "",
+        "raw": {
+          "timestamp": "2026-02-04T10:20:18.447792"
+        },
+        "visual": {
+          "brightness": {
+            "text": "The current environmental brightness is 0.000, on a scale of 0 to 1.",
+            "value": 0.0
+          },
+          "context": {
+            "activity": "unknown",
+            "location": "library"
+          },
+          "eye_state": "unknown",
+          "hand_state": "unknown",
+          "interaction_target": "unknown",
+          "objects": [
+            "book"
+          ],
+          "scene_description": ""
+        }
+      },
+      "timestamp": "2026-02-04T10:20:18.447957Z"
+    },
+    {
+      "name": "intentgpt.prompt",
+      "payload": {
+        "prompt": "You are IntentGPT. Infer the user's intent by reasoning over multimodal inputs (vision, audio, context, history). Use intermodal complementarity to resolve ambiguity (e.g., 'this' can be disambiguated by gaze/pointing). Use the credibility report to down-weight unreliable modalities. Return ONLY a JSON object (no markdown) with the required keys.\n\nINTENT_PREDICTION_JSON\n\n### INTENT TAXONOMY\n\n- Request Search: User wants to query / search information about something (often a referenced object).\n- Request Collaborator: User wants assistance in the environment (navigation, locating, collaborative manipulation).\n- Request Physical Help: User wants the system/robot to execute a physical action.\n- Request Companion: User wants social interaction / companionship.\n\n### FEW-SHOT EXAMPLE\nScenario: Party toast with a wine glass\nStructured hint JSON:\n{\n  \"audio\": {\n    \"speech\": {\n      \"confidence\": 0.92,\n      \"transcript\": \"Cheers everyone!\"\n    }\n  },\n  \"visual\": {\n    \"hand_state\": \"raising_glass\",\n    \"interaction_target\": \"wine_glass\"\n  }\n}\nParticipant reasoning: Raising a glass at a party could mean 'toast', 'pour more wine', or 'find information about this wine'.\nExpected intent JSON:\n{\n  \"description\": \"User initiates a toast / social interaction with companion.\",\n  \"label\": \"Request Companion\",\n  \"requires_audio\": true,\n  \"requires_physical\": false,\n  \"requires_visual\": true\n}\nCoT (short): The user raised a wine glass and said 'cheers'. This is a social interaction intent → Request Companion.\n\n### FEW-SHOT EXAMPLE\nScenario: Pointing to a coffee machine\nStructured hint JSON:\n{\n  \"audio\": {\n    \"speech\": {\n      \"confidence\": 0.88,\n      \"transcript\": \"Get me a cup of this.\"\n    }\n  },\n  \"visual\": {\n    \"hand_state\": \"pointing\",\n    \"interaction_target\": \"coffee_machine\"\n  }\n}\nParticipant reasoning: The phrase 'this' is ambiguous; gesture resolves the target as the coffee machine.\nExpected intent JSON:\n{\n  \"description\": \"User requests help to make coffee using the coffee machine.\",\n  \"label\": \"Request Collaborator\",\n  \"requires_audio\": true,\n  \"requires_physical\": true,\n  \"requires_visual\": true\n}\nCoT (short): Combine speech ('this') with pointing target to infer a coffee-making request → Request Collaborator/Physical Help.\n\n### FEW-SHOT EXAMPLE\nScenario: Library book information query\nStructured hint JSON:\n{\n  \"audio\": {\n    \"speech\": {\n      \"confidence\": 0.95,\n      \"transcript\": \"Query information about this book.\"\n    }\n  },\n  \"visual\": {\n    \"context\": {\n      \"location\": \"library\"\n    },\n    \"objects\": [\n      \"book\"\n    ]\n  }\n}\nParticipant reasoning: In a library, 'this book' suggests information retrieval; focus on title/author.\nExpected intent JSON:\n{\n  \"description\": \"User wants to search information about the referenced book.\",\n  \"label\": \"Request Search\",\n  \"requires_audio\": true,\n  \"requires_physical\": false,\n  \"requires_visual\": true\n}\nCoT (short): Given 'this book' + library context, infer info search intent → Request Search.\n\n### INPUT\n\nUSER_UTTERANCE: query information about this book\n\nSTRUCTURED_TEXT_JSON:\n\n{\n  \"audio\": {\n    \"sound_classification\": {\n      \"likely_event\": \"\",\n      \"top3\": []\n    },\n    \"speech\": {\n      \"confidence\": 0.95,\n      \"text\": \"The current speech recognition result is 'Query information about this book.', with a confidence level of 0.95.\",\n      \"transcript\": \"Query information about this book.\"\n    },\n    \"volume\": {\n      \"decibels\": null,\n      \"text\": \"The environmental volume is approximately unknown decibels.\",\n      \"voiced_ratio\": null\n    }\n  },\n  \"credibility_report\": {\n    \"attention_hint\": \"Prioritize auditory/speech information over visual details due to low visual credibility.\",\n    \"report\": \"Visual incredible; Voice credible.\",\n    \"visual\": {\n      \"brightness\": 0.0,\n      \"credible\": false,\n      \"reason\": \"Brightness 0.000 < 0.15 (too dark).\"\n    },\n    \"voice\": {\n      \"credible\": true,\n      \"reason\": \"Speech confidence 0.95 >= 0.70.\",\n      \"speech_confidence\": 0.95\n    }\n  },\n  \"history_retrieval\": [],\n  \"history_summary\": \"\",\n  \"raw\": {\n    \"timestamp\": \"2026-02-04T10:20:18.447792\"\n  },\n  \"visual\": {\n    \"brightness\": {\n      \"text\": \"The current environmental brightness is 0.000, on a scale of 0 to 1.\",\n      \"value\": 0.0\n    },\n    \"context\": {\n      \"activity\": \"unknown\",\n      \"location\": \"library\"\n    },\n    \"eye_state\": \"unknown\",\n    \"hand_state\": \"unknown\",\n    \"interaction_target\": \"unknown\",\n    \"objects\": [\n      \"book\"\n    ],\n    \"scene_description\": \"\"\n  }\n}\n\n### OUTPUT FORMAT\n\nReturn JSON with keys:\n\n- label: string (one of taxonomy labels when possible)\n\n- description: string\n\n- confidence: number in [0,1]\n\n- entities: object\n\n- requires_visual: boolean\n\n- requires_audio: boolean\n\n- requires_physical: boolean"
+      },
+      "timestamp": "2026-02-04T10:20:18.448869Z"
+    },
+    {
+      "name": "intentgpt.llm_output",
+      "payload": {
+        "text": "{\n  \"confidence\": 0.78,\n  \"description\": \"User wants to query / search for information.\",\n  \"entities\": {\n    \"context_location\": \"library\",\n    \"objects\": [\n      \"book\"\n    ],\n    \"query\": \"query information about this book\"\n  },\n  \"label\": \"Request Search\",\n  \"requires_audio\": true,\n  \"requires_physical\": false,\n  \"requires_visual\": false\n}"
+      },
+      "timestamp": "2026-02-04T10:20:18.449091Z"
+    },
+    {
+      "name": "intentgpt.intent",
+      "payload": {
+        "confidence": 0.78,
+        "description": "User wants to query / search for information.",
+        "entities": {
+          "context_location": "library",
+          "objects": [
+            "book"
+          ],
+          "query": "query information about this book"
+        },
+        "label": "Request Search",
+        "requires_audio": true,
+        "requires_physical": false,
+        "requires_visual": false
+      },
+      "timestamp": "2026-02-04T10:20:18.449133Z"
+    },
+    {
+      "name": "taskgpt.prompt",
+      "payload": {
+        "prompt": "You are TaskGPT. Create an actionable, step-by-step task plan that matches the user's intent. Avoid losing crucial details (especially spatial relationships) in complex scenes. Follow the focus instruction to allocate attention to intent-relevant inputs.\n\nTASK_PLAN_JSON\n\nINTENT_LABEL: Request Search\n\nINTENT_DESCRIPTION: User wants to query / search for information.\n\nFOCUS_INSTRUCTION: Focus on identifying the referenced object/entity (e.g., book title/author) from visual context (objects, scene description, interaction target) and the utterance. Ignore unrelated scene details. Credibility hint: Prioritize auditory/speech information over visual details due to low visual credibility.\n\nFILTERED_STRUCTURED_TEXT_JSON:\n\n{\n  \"audio\": {\n    \"speech\": {\n      \"confidence\": 0.95,\n      \"text\": \"The current speech recognition result is 'Query information about this book.', with a confidence level of 0.95.\",\n      \"transcript\": \"Query information about this book.\"\n    }\n  },\n  \"credibility_report\": {\n    \"attention_hint\": \"Prioritize auditory/speech information over visual details due to low visual credibility.\",\n    \"report\": \"Visual incredible; Voice credible.\",\n    \"visual\": {\n      \"brightness\": 0.0,\n      \"credible\": false,\n      \"reason\": \"Brightness 0.000 < 0.15 (too dark).\"\n    },\n    \"voice\": {\n      \"credible\": true,\n      \"reason\": \"Speech confidence 0.95 >= 0.70.\",\n      \"speech_confidence\": 0.95\n    }\n  },\n  \"history_retrieval\": [],\n  \"history_summary\": \"\",\n  \"visual\": {\n    \"context\": {\n      \"activity\": \"unknown\",\n      \"location\": \"library\"\n    },\n    \"interaction_target\": \"unknown\",\n    \"objects\": [\n      \"book\"\n    ],\n    \"scene_description\": \"\"\n  }\n}\n\n### OUTPUT FORMAT\n\nReturn a JSON object with keys:\n\n- goal: string\n\n- steps: list of {step_id: int, instruction: string, required_capabilities: list[string]}\n\nValid capability strings are:\n\nspeech_io, text_io, visual_expression, vision_perception, audio_perception, physical_interaction, navigation, creativity"
+      },
+      "timestamp": "2026-02-04T10:20:18.449247Z"
+    },
+    {
+      "name": "taskgpt.llm_output",
+      "payload": {
+        "text": "{\n  \"goal\": \"Find and present the requested information.\",\n  \"steps\": [\n    {\n      \"instruction\": \"Identify the referenced entity/object from visual context (title/label/appearance) and the utterance.\",\n      \"required_capabilities\": [\n        \"vision_perception\",\n        \"speech_io\"\n      ],\n      \"step_id\": 1\n    },\n    {\n      \"instruction\": \"Formulate a precise digital query (e.g., book title + author) and choose the appropriate source (catalog/web).\",\n      \"required_capabilities\": [\n        \"text_io\"\n      ],\n      \"step_id\": 2\n    },\n    {\n      \"instruction\": \"Retrieve key facts and disambiguate results using context/history if needed.\",\n      \"required_capabilities\": [\n        \"text_io\"\n      ],\n      \"step_id\": 3\n    },\n    {\n      \"instruction\": \"Answer the user clearly and concisely; cite source if applicable.\",\n      \"required_capabilities\": [\n        \"speech_io\",\n        \"text_io\"\n      ],\n      \"step_id\": 4\n    }\n  ]\n}"
+      },
+      "timestamp": "2026-02-04T10:20:18.449413Z"
+    },
+    {
+      "name": "taskgpt.task_plan",
+      "payload": {
+        "goal": "Find and present the requested information.",
+        "steps": [
+          {
+            "instruction": "Identify the referenced entity/object from visual context (title/label/appearance) and the utterance.",
+            "required_capabilities": [
+              "vision_perception",
+              "speech_io"
+            ],
+            "step_id": 1
+          },
+          {
+            "instruction": "Formulate a precise digital query (e.g., book title + author) and choose the appropriate source (catalog/web).",
+            "required_capabilities": [
+              "text_io"
+            ],
+            "step_id": 2
+          },
+          {
+            "instruction": "Retrieve key facts and disambiguate results using context/history if needed.",
+            "required_capabilities": [
+              "text_io"
+            ],
+            "step_id": 3
+          },
+          {
+            "instruction": "Answer the user clearly and concisely; cite source if applicable.",
+            "required_capabilities": [
+              "speech_io",
+              "text_io"
+            ],
+            "step_id": 4
+          }
+        ]
+      },
+      "timestamp": "2026-02-04T10:20:18.449470Z"
+    },
+    {
+      "name": "agentgpt.candidates",
+      "payload": {
+        "candidates": [
+          "multimodal_assistant",
+          "ar_companion",
+          "digital_assistant"
+        ],
+        "decision_path": [
+          "requires vision_perception -> multimodal/ar"
+        ],
+        "required_capabilities": [
+          "vision_perception",
+          "speech_io",
+          "text_io"
+        ]
+      },
+      "timestamp": "2026-02-04T10:20:18.449495Z"
+    },
+    {
+      "name": "agentgpt.recommendation",
+      "payload": {
+        "agent_type": "multimodal_assistant",
+        "estimated_cost": 1.6,
+        "missing_capabilities": [],
+        "rationale": "Selected multimodal_assistant because it satisfies all required capabilities (vision_perception, speech_io, text_io) with low estimated cost. Decision path: requires vision_perception -> multimodal/ar.",
+        "satisfied_capabilities": [
+          "vision_perception",
+          "speech_io",
+          "text_io"
+        ]
+      },
+      "timestamp": "2026-02-04T10:20:18.449523Z"
+    },
+    {
+      "name": "pipeline.result",
+      "payload": {
+        "agent": {
+          "agent_type": "multimodal_assistant",
+          "estimated_cost": 1.6,
+          "missing_capabilities": [],
+          "rationale": "Selected multimodal_assistant because it satisfies all required capabilities (vision_perception, speech_io, text_io) with low estimated cost. Decision path: requires vision_perception -> multimodal/ar.",
+          "satisfied_capabilities": [
+            "vision_perception",
+            "speech_io",
+            "text_io"
+          ]
+        },
+        "intent": {
+          "confidence": 0.78,
+          "description": "User wants to query / search for information.",
+          "entities": {
+            "context_location": "library",
+            "objects": [
+              "book"
+            ],
+            "query": "query information about this book"
+          },
+          "label": "Request Search",
+          "requires_audio": true,
+          "requires_physical": false,
+          "requires_visual": false
+        },
+        "structured_text": {
+          "audio": {
+            "sound_classification": {
+              "likely_event": "",
+              "top3": []
+            },
+            "speech": {
+              "confidence": 0.95,
+              "text": "The current speech recognition result is 'Query information about this book.', with a confidence level of 0.95.",
+              "transcript": "Query information about this book."
+            },
+            "volume": {
+              "decibels": null,
+              "text": "The environmental volume is approximately unknown decibels.",
+              "voiced_ratio": null
+            }
+          },
+          "credibility_report": {
+            "attention_hint": "Prioritize auditory/speech information over visual details due to low visual credibility.",
+            "report": "Visual incredible; Voice credible.",
+            "visual": {
+              "brightness": 0.0,
+              "credible": false,
+              "reason": "Brightness 0.000 < 0.15 (too dark)."
+            },
+            "voice": {
+              "credible": true,
+              "reason": "Speech confidence 0.95 >= 0.70.",
+              "speech_confidence": 0.95
+            }
+          },
+          "history_retrieval": [],
+          "history_summary": "",
+          "raw": {
+            "timestamp": "2026-02-04T10:20:18.447792"
+          },
+          "visual": {
+            "brightness": {
+              "text": "The current environmental brightness is 0.000, on a scale of 0 to 1.",
+              "value": 0.0
+            },
+            "context": {
+              "activity": "unknown",
+              "location": "library"
+            },
+            "eye_state": "unknown",
+            "hand_state": "unknown",
+            "interaction_target": "unknown",
+            "objects": [
+              "book"
+            ],
+            "scene_description": ""
+          }
+        },
+        "task_plan": {
+          "goal": "Find and present the requested information.",
+          "steps": [
+            {
+              "instruction": "Identify the referenced entity/object from visual context (title/label/appearance) and the utterance.",
+              "required_capabilities": [
+                "vision_perception",
+                "speech_io"
+              ],
+              "step_id": 1
+            },
+            {
+              "instruction": "Formulate a precise digital query (e.g., book title + author) and choose the appropriate source (catalog/web).",
+              "required_capabilities": [
+                "text_io"
+              ],
+              "step_id": 2
+            },
+            {
+              "instruction": "Retrieve key facts and disambiguate results using context/history if needed.",
+              "required_capabilities": [
+                "text_io"
+              ],
+              "step_id": 3
+            },
+            {
+              "instruction": "Answer the user clearly and concisely; cite source if applicable.",
+              "required_capabilities": [
+                "speech_io",
+                "text_io"
+              ],
+              "step_id": 4
+            }
+          ]
+        }
+      },
+      "timestamp": "2026-02-04T10:20:18.449547Z"
+    },
+    {
+      "name": "pipeline.end",
+      "payload": {},
+      "timestamp": "2026-02-04T10:20:18.449551Z"
+    }
+  ]
+}
