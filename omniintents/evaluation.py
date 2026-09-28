@@ -145,8 +145,9 @@ def environment_manifest() -> dict[str, Any]:
     except (OSError, subprocess.CalledProcessError):
         pass
     source_hash = hashlib.sha256()
-    for path in sorted(Path(__file__).resolve().parent.rglob("*.py")):
-        source_hash.update(str(path.relative_to(Path(__file__).parent)).replace("\\", "/").encode())
+    source_root = Path(__file__).resolve().parent
+    for path in sorted(source_root.rglob("*.py")):
+        source_hash.update(path.relative_to(source_root).as_posix().encode())
         source_hash.update(path.read_bytes())
     return {
         "package_version": __version__, "python": platform.python_version(),

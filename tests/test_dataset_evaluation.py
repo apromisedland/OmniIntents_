@@ -110,6 +110,18 @@ def test_repeated_offline_results_are_deterministic():
     assert first["claim"] == "synthetic_sanity_only"
 
 
+def test_manifest_uses_one_resolved_source_root(monkeypatch):
+    from pathlib import Path
+    from omniintents import evaluation
+
+    original = evaluation.environment_manifest()
+    repository = Path(evaluation.__file__).resolve().parent.parent
+    monkeypatch.chdir(repository)
+    monkeypatch.setattr(evaluation, "__file__", "omniintents/evaluation.py")
+    relative = evaluation.environment_manifest()
+    assert relative["source_sha256"] == original["source_sha256"]
+
+
 def test_full_ablation_artifacts(tmp_path):
     samples, digest = load_dataset()
     root = tmp_path / "experiment"
