@@ -1,0 +1,209 @@
+{
+  "kind": "reported_in_paper_not_reproduced",
+  "source_url": "https://apromisedland.github.io/omniintents-paper-page/assets/omniintents-paper.pdf",
+  "intent": {
+    "source": "intent",
+    "iclEvaluatedEntries": 371,
+    "trainingSplitPercent": 75,
+    "note": "BERT and fine-tuning use a 75/25 train/test split; ICL reports 371 evaluated entries. These methods do not all use the same test subset. No seeds or repeated-run intervals are supplied.",
+    "rows": [
+      {
+        "name": "Top-n dominant",
+        "generalAcc": 37.2,
+        "generalF1": 6.3,
+        "specificAcc": 21.7,
+        "specificF1": 3.1
+      },
+      {
+        "name": "BERT",
+        "generalAcc": 58.5,
+        "generalF1": 54.3,
+        "specificAcc": 49.6,
+        "specificF1": 47.8
+      },
+      {
+        "name": "ICL · Llama 3.1",
+        "generalAcc": 76.7,
+        "generalF1": 72.4,
+        "specificAcc": 62.9,
+        "specificF1": 60.1
+      },
+      {
+        "name": "ICL · GPT-4o",
+        "generalAcc": 83.6,
+        "generalF1": 80.7,
+        "specificAcc": 66.1,
+        "specificF1": 63.4,
+        "highlight": true
+      },
+      {
+        "name": "FT · Llama 3.1",
+        "generalAcc": 82.4,
+        "generalF1": 79.1,
+        "specificAcc": 64.5,
+        "specificF1": 61.7
+      },
+      {
+        "name": "FT · GPT-4o mini",
+        "generalAcc": 73.9,
+        "generalF1": 68.5,
+        "specificAcc": 60.5,
+        "specificF1": 58.2
+      }
+    ]
+  },
+  "agent": {
+    "source": "agent",
+    "iclEvaluatedEntries": 374,
+    "note": "Single-label agent selection. ICL reports 374 evaluated entries; fine-tuning uses a 75/25 split. Table 4 does not specify the F1 averaging method.",
+    "rows": [
+      {
+        "name": "ICL · Llama 3.1",
+        "acc": 68.1,
+        "f1": 65.3
+      },
+      {
+        "name": "ICL · GPT-4o mini",
+        "acc": 65.9,
+        "f1": 63.5
+      },
+      {
+        "name": "ICL · GPT-4o",
+        "acc": 77.1,
+        "f1": 76.2,
+        "highlight": true
+      },
+      {
+        "name": "FT · Llama 3.1",
+        "acc": 76.2,
+        "f1": 72.8
+      },
+      {
+        "name": "FT · GPT-4o mini",
+        "acc": 68.7,
+        "f1": 64.2
+      }
+    ]
+  },
+  "modalities": {
+    "source": "modalities",
+    "model": "ICL · GPT-4o",
+    "task": "Specific intent prediction",
+    "rows": [
+      {
+        "id": "complete",
+        "label": "Complete inputs",
+        "acc": 66.1,
+        "f1": 63.1,
+        "latency": 4.32,
+        "note": "Reference configuration for this ablation experiment."
+      },
+      {
+        "id": "context",
+        "label": "Without context",
+        "acc": 56.8,
+        "f1": 54.7,
+        "latency": 4.08,
+        "note": "Remove contextual information from the input."
+      },
+      {
+        "id": "objects",
+        "label": "Without objects",
+        "acc": 60.8,
+        "f1": 56.2,
+        "latency": 3.25,
+        "note": "Remove object information from the input."
+      },
+      {
+        "id": "gaze-hands",
+        "label": "Without eye / hand cues",
+        "acc": 48.3,
+        "f1": 43.1,
+        "latency": 3.74,
+        "note": "Remove eye and hand states together with their targets."
+      },
+      {
+        "id": "voice",
+        "label": "Without voice cues",
+        "acc": 11.2,
+        "f1": 8.6,
+        "latency": 3.63,
+        "note": "Remove voice state and target information. This is the largest reduction among the measured removals."
+      },
+      {
+        "id": "audio",
+        "label": "Without audio labels",
+        "acc": 63.9,
+        "f1": 59.2,
+        "latency": 3.56,
+        "note": "Remove audio classification information."
+      }
+    ]
+  },
+  "cbas": {
+    "source": "cbas",
+    "samples": 105,
+    "rows": [
+      {
+        "enabled": false,
+        "label": "Without CBAS",
+        "acc": 23.2,
+        "f1": 20.6,
+        "latency": 4.23
+      },
+      {
+        "enabled": true,
+        "label": "With CBAS",
+        "acc": 56.1,
+        "f1": 54.8,
+        "latency": 4.68
+      }
+    ],
+    "note": "Evaluated on samples with obstructed visual or verbal channels. CBAS supplies textual reliability guidance to reasoning; it is not a demonstrated edit of internal neural attention weights."
+  },
+  "history": {
+    "source": "history",
+    "samples": 306,
+    "sequences": 51,
+    "sequenceLength": 6,
+    "rows": [
+      {
+        "rounds": 0,
+        "acc": 65.9,
+        "f1": 63.3,
+        "latency": 4.29
+      },
+      {
+        "rounds": 1,
+        "acc": 69.3,
+        "f1": 65.4,
+        "latency": 4.51
+      },
+      {
+        "rounds": 2,
+        "acc": 70.6,
+        "f1": 68.2,
+        "latency": 4.68
+      },
+      {
+        "rounds": 3,
+        "acc": 70.4,
+        "f1": 67.3,
+        "latency": 4.75
+      },
+      {
+        "rounds": 4,
+        "acc": 69.5,
+        "f1": 66.9,
+        "latency": 4.79
+      },
+      {
+        "rounds": 5,
+        "acc": 68.7,
+        "f1": 64.2,
+        "latency": 4.86
+      }
+    ],
+    "note": "ICL GPT-4o, specific intent prediction, temporally coherent diary subset. Discrete measured states only. Two rounds performed best in this experiment, not an established universal optimum. No repeated-run uncertainty is supplied."
+  }
+}

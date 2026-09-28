@@ -1,27 +1,16 @@
-"""OmniIntents enhanced reference implementation."""
+"""OmniIntents 0.3: a paper-aligned reference with explicit reproduction limits."""
 
+__version__ = "0.3.0"
+
+from .config import OmniIntentsConfig
 from .pipeline import OmniIntentsPipeline
 from .types import (
-    MultimodalInput,
-    StructuredText,
-    Intent,
-    TaskPlan,
-    AgentRecommendation,
-    AgentType,
-    Capability,
-    OmniIntentsResult,
-    PipelineTrace,
+    AgentRecommendation, AgentType, Capability, Intent, IntentPrediction,
+    MultimodalInput, OmniIntentsResult, PipelineTrace, StructuredText, TaskPlan, TaskStep,
 )
 
 __all__ = [
-    "OmniIntentsPipeline",
-    "MultimodalInput",
-    "StructuredText",
-    "Intent",
-    "TaskPlan",
-    "AgentRecommendation",
-    "AgentType",
-    "Capability",
-    "OmniIntentsResult",
-    "PipelineTrace",
+    "OmniIntentsConfig", "OmniIntentsPipeline", "AgentRecommendation", "AgentType", "Capability",
+    "Intent", "IntentPrediction", "MultimodalInput", "OmniIntentsResult", "PipelineTrace",
+    "StructuredText", "TaskPlan", "TaskStep",
 ]

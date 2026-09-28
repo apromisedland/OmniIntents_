@@ -1,0 +1,415 @@
+[
+  {
+    "id": "supp-intent-01",
+    "source": "Supplementary Material A.1",
+    "kind": "published_example_adapted_to_json",
+    "input": {
+      "utterance": "bring me a glass of water",
+      "visual": {
+        "context": {
+          "location": "living room",
+          "activity": "looking at cell phone screen and holding a phone"
+        },
+        "objects": [
+          "TV",
+          "sofa",
+          "human"
+        ],
+        "hand_state": "Left hand holding a phone",
+        "hand_target": "phone",
+        "eye_state": "looking at cell phone screen",
+        "eye_target": "phone"
+      },
+      "audio": {
+        "speech": {
+          "transcript": "bring me a glass of water",
+          "confidence": null
+        },
+        "voice_target": "water",
+        "volume": {
+          "value": 60,
+          "unit": "paper_unspecified_dB"
+        }
+      },
+      "credibility_report": {
+        "visual": {
+          "credible": true
+        },
+        "voice": {
+          "credible": true
+        }
+      }
+    },
+    "output": {
+      "complementarity": "non_complementary",
+      "ambiguity": "ambiguous",
+      "candidates": [
+        {
+          "specific_label": "Request Collaborator",
+          "description": "Bring the glass of water",
+          "confidence": 0.75
+        },
+        {
+          "specific_label": "Search/Recognize Digital Information",
+          "description": "Search information online",
+          "confidence": 0.5
+        },
+        {
+          "specific_label": "Request Collaborator",
+          "description": "Order food online",
+          "confidence": 0.25
+        }
+      ],
+      "evidence_summary": "Speech refers to water while gaze and hands refer to a phone, leaving several possible tasks and targets."
+    },
+    "notes": "Source reasoning mentions a book despite the phone input; input is retained and that conflicting reasoning is not used. Candidate confidence values are illustrative JSON additions, not measured paper probabilities."
+  },
+  {
+    "id": "supp-intent-02",
+    "source": "Supplementary Material A.1",
+    "kind": "published_example_adapted_to_json",
+    "input": {
+      "utterance": "",
+      "visual": {
+        "context": {
+          "location": "library",
+          "activity": "looking straight ahead and pointing at the bookshelf"
+        },
+        "objects": [
+          "bookshelf",
+          "books",
+          "human"
+        ],
+        "hand_state": "pointing at the bookshelf",
+        "hand_target": "bookshelf",
+        "eye_state": "looking straight ahead",
+        "eye_target": null
+      },
+      "audio": {
+        "speech": {
+          "transcript": null,
+          "confidence": null
+        },
+        "voice_target": null,
+        "volume": {
+          "value": 10,
+          "unit": "paper_unspecified_dB"
+        }
+      },
+      "credibility_report": {
+        "visual": {
+          "credible": true
+        },
+        "voice": {
+          "credible": false
+        }
+      }
+    },
+    "output": {
+      "complementarity": "non_complementary",
+      "ambiguity": "ambiguous",
+      "candidates": [
+        {
+          "specific_label": "Search/Recognize Digital Information",
+          "description": "Introduce books on the bookshelf",
+          "confidence": 0.75
+        },
+        {
+          "specific_label": "Location Guide",
+          "description": "Search the location of a book on the bookshelf",
+          "confidence": 0.5
+        }
+      ],
+      "evidence_summary": "Pointing identifies the bookshelf area, but without speech the requested task and exact book remain unclear."
+    },
+    "notes": "Source's None third candidate is omitted. Candidate confidence values are illustrative JSON additions, not measured paper probabilities."
+  },
+  {
+    "id": "supp-intent-03",
+    "source": "Supplementary Material A.1",
+    "kind": "published_example_adapted_to_json",
+    "input": {
+      "utterance": "turn on the light",
+      "visual": {
+        "context": {
+          "location": null,
+          "activity": null
+        },
+        "objects": [],
+        "hand_state": "closed or not visible",
+        "hand_target": null,
+        "eye_state": "closed or not visible",
+        "eye_target": null
+      },
+      "audio": {
+        "speech": {
+          "transcript": "turn on the light",
+          "confidence": null
+        },
+        "voice_target": "light",
+        "volume": {
+          "value": 50,
+          "unit": "paper_unspecified_dB"
+        }
+      },
+      "credibility_report": {
+        "visual": {
+          "credible": false
+        },
+        "voice": {
+          "credible": true
+        }
+      }
+    },
+    "output": {
+      "complementarity": "non_complementary",
+      "ambiguity": "unambiguous",
+      "candidates": [
+        {
+          "specific_label": "Request Collaborator",
+          "description": "Turn on the light",
+          "confidence": 0.75
+        }
+      ],
+      "evidence_summary": "The spoken command identifies both the light and the requested action despite absent visual evidence."
+    },
+    "notes": "Source None values are JSON null; no brightness or ASR confidence is invented. Candidate confidence values are illustrative JSON additions, not measured paper probabilities."
+  },
+  {
+    "id": "supp-intent-04",
+    "source": "Supplementary Material A.1",
+    "kind": "published_example_adapted_to_json",
+    "input": {
+      "utterance": "",
+      "visual": {
+        "context": {
+          "location": "party",
+          "activity": "looking at the glass of wine and holding a glass of wine"
+        },
+        "objects": [
+          "wine",
+          "human",
+          "table",
+          "chair",
+          "food",
+          "drink"
+        ],
+        "hand_state": "holding a glass of wine",
+        "hand_target": "wine",
+        "eye_state": "looking at the glass of wine",
+        "eye_target": "wine"
+      },
+      "audio": {
+        "speech": {
+          "transcript": null,
+          "confidence": null
+        },
+        "voice_target": null,
+        "volume": {
+          "value": 111,
+          "unit": "paper_unspecified_dB"
+        }
+      },
+      "credibility_report": {
+        "visual": {
+          "credible": true
+        },
+        "voice": {
+          "credible": false
+        }
+      }
+    },
+    "output": {
+      "complementarity": "non_complementary",
+      "ambiguity": "ambiguous",
+      "candidates": [
+        {
+          "specific_label": "Request Collaborator",
+          "description": "Pour a glass of wine",
+          "confidence": 0.75
+        },
+        {
+          "specific_label": "Interact with Companion",
+          "description": "Raises the glass",
+          "confidence": 0.5
+        }
+      ],
+      "evidence_summary": "Hand and gaze identify wine; absent reliable speech leaves pouring and toasting as alternatives."
+    },
+    "notes": "Source reasoning mentions a phone; conflicting reasoning is omitted while the published input and candidate labels are retained. Candidate confidence values are illustrative JSON additions, not measured paper probabilities."
+  },
+  {
+    "id": "supp-intent-05",
+    "source": "Supplementary Material A.1",
+    "kind": "published_example_adapted_to_json",
+    "input": {
+      "utterance": "sit here and chat",
+      "visual": {
+        "context": {
+          "location": "living room",
+          "activity": "looking at the sofa and pointing at the sofa"
+        },
+        "objects": [
+          "sofa",
+          "human",
+          "table"
+        ],
+        "hand_state": "pointing at the sofa",
+        "hand_target": "sofa",
+        "eye_state": "looking at the sofa",
+        "eye_target": "sofa"
+      },
+      "audio": {
+        "speech": {
+          "transcript": "sit here and chat",
+          "confidence": null
+        },
+        "voice_target": null,
+        "volume": {
+          "value": 65,
+          "unit": "paper_unspecified_dB"
+        }
+      },
+      "credibility_report": {
+        "visual": {
+          "credible": true
+        },
+        "voice": {
+          "credible": true
+        }
+      }
+    },
+    "output": {
+      "complementarity": "complementary",
+      "ambiguity": "unambiguous",
+      "candidates": [
+        {
+          "specific_label": "Interact with Companion",
+          "description": "Sit on the sofa and chat",
+          "confidence": 0.75
+        }
+      ],
+      "evidence_summary": "Gaze, pointing and speech jointly identify the sofa and a companionship request."
+    },
+    "notes": "Capitalization normalized. Candidate confidence values are illustrative JSON additions, not measured paper probabilities."
+  },
+  {
+    "id": "supp-intent-06",
+    "source": "Supplementary Material A.1",
+    "kind": "published_example_adapted_to_json",
+    "input": {
+      "utterance": "trun it on",
+      "visual": {
+        "context": {
+          "location": "living room",
+          "activity": "looking at the ceiling fan and pointing at the ceiling fan"
+        },
+        "objects": [
+          "ceiling fan",
+          "human",
+          "table",
+          "chair",
+          "bed",
+          "computer"
+        ],
+        "hand_state": "pointing at the ceiling fan",
+        "hand_target": "ceiling fan",
+        "eye_state": "looking at the ceiling fan",
+        "eye_target": "ceiling fan"
+      },
+      "audio": {
+        "speech": {
+          "transcript": "trun it on",
+          "confidence": null
+        },
+        "voice_target": null,
+        "volume": {
+          "value": 48,
+          "unit": "paper_unspecified_dB"
+        }
+      },
+      "credibility_report": {
+        "visual": {
+          "credible": true
+        },
+        "voice": {
+          "credible": true
+        }
+      }
+    },
+    "output": {
+      "complementarity": "complementary",
+      "ambiguity": "unambiguous",
+      "candidates": [
+        {
+          "specific_label": "Request Collaborator",
+          "description": "Turn on the ceiling fan",
+          "confidence": 0.75
+        }
+      ],
+      "evidence_summary": "Gaze and pointing identify the ceiling fan; speech asks to turn it on."
+    },
+    "notes": "Published speech typo 'trun' retained; contradictory holding/pointing reasoning omitted. Candidate confidence values are illustrative JSON additions, not measured paper probabilities."
+  },
+  {
+    "id": "supp-intent-07",
+    "source": "Supplementary Material A.1",
+    "kind": "published_example_adapted_to_json",
+    "input": {
+      "utterance": "draw a flower for me",
+      "visual": {
+        "context": {
+          "location": "laboratory",
+          "activity": "looking at the laptop and pointing at the laptop"
+        },
+        "objects": [
+          "computer",
+          "human",
+          "table",
+          "chair"
+        ],
+        "hand_state": "pointing at the laptop",
+        "hand_target": "laptop",
+        "eye_state": "looking at the laptop",
+        "eye_target": "laptop"
+      },
+      "audio": {
+        "speech": {
+          "transcript": "draw a flower for me",
+          "confidence": null
+        },
+        "voice_target": "flower",
+        "volume": {
+          "value": 71,
+          "unit": "paper_unspecified_dB"
+        }
+      },
+      "credibility_report": {
+        "visual": {
+          "credible": true
+        },
+        "voice": {
+          "credible": true
+        }
+      }
+    },
+    "output": {
+      "complementarity": "complementary",
+      "ambiguity": "ambiguous",
+      "candidates": [
+        {
+          "specific_label": "Request Collaborator",
+          "description": "Drawing a flower",
+          "confidence": 0.75
+        },
+        {
+          "specific_label": "Search/Recognize Digital Information",
+          "description": "Search information online",
+          "confidence": 0.5
+        }
+      ],
+      "evidence_summary": "Speech requests a flower while gaze and hands indicate the laptop; the original example lists multiple interpretations."
+    },
+    "notes": "The published Request Collaborator label is retained despite overlap with Generate Documents; it is not treated as an independently validated label. Candidate confidence values are illustrative JSON additions, not measured paper probabilities."
+  }
+]

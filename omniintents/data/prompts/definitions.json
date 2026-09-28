@@ -1,0 +1,23 @@
+{
+  "Teaching": "Assisting with educational or instructional needs.",
+  "Error Correction": "Identifying and correcting mistakes.",
+  "Shopping Guide": "Helping with purchasing decisions and product selection.",
+  "Location Guide": "Providing information and guidance about locations.",
+  "Interact with Companion": "Engaging in interaction or conversation.",
+  "Listen to Companion": "Paying attention and responding to stories or information shared.",
+  "Watch with Companion": "Sharing a viewing experience together.",
+  "Request Collaborator": "Assisting with tasks or activities.",
+  "Search/Recognize Physical Items": "Locating tangible objects or items.",
+  "Search/Recognize Digital Information": "Finding information available in digital formats.",
+  "Request Remote Control": "Collaborating in remote environments.",
+  "Repair": "Fixing broken or malfunctioning items.",
+  "Check": "Inspecting the condition or status of items.",
+  "Replace": "Substituting damaged or worn-out parts.",
+  "Clean": "Cleaning various items or areas.",
+  "Top-priority Actions": "Asking for top-priority actions, including stopping current activity.",
+  "Rescue": "Seeking assistance in emergency or dangerous situations.",
+  "Save Documents": "Saving documents.",
+  "Share Documents": "Sharing documents online.",
+  "Edit Documents": "Editing documents.",
+  "Generate Documents": "Generating documents based on given parameters."
+}

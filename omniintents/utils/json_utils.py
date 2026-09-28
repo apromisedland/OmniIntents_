@@ -1,67 +1,62 @@
+"""Strict JSON decoding with bounded recovery from surrounding model text."""
+
 from __future__ import annotations
 
 import json
-import re
-from typing import Any, Dict, Optional, Union
+from typing import Any
+
+from ..errors import ValidationError
 
 
-_FENCED_JSON_RE = re.compile(r"```(?:json)?\s*(\{.*?\}|\[.*?\])\s*```", flags=re.DOTALL)
-_FIRST_JSON_OBJ_RE = re.compile(r"\{.*\}", flags=re.DOTALL)
-_FIRST_JSON_ARR_RE = re.compile(r"\[.*\]", flags=re.DOTALL)
+def dumps_pretty(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True, allow_nan=False)
 
 
-def dumps_pretty(obj: Any) -> str:
-    return json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True)
+def _constant(value: str) -> None:
+    raise ValidationError(f"Non-finite JSON constant: {value}")
 
 
-def _try_load(candidate: str) -> Optional[Union[Dict[str, Any], Any]]:
+def _pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValidationError(f"Duplicate JSON key: {key}")
+        result[key] = value
+    return result
+
+
+def strict_loads(text: str) -> Any:
     try:
-        return json.loads(candidate)
-    except json.JSONDecodeError:
-        # Remove trailing commas: { "a": 1, } or [1,2,]
-        candidate2 = re.sub(r",\s*([}\]])", r"\1", candidate)
-        try:
-            return json.loads(candidate2)
-        except json.JSONDecodeError:
-            return None
+        return json.loads(text, parse_constant=_constant, object_pairs_hook=_pairs)
+    except (json.JSONDecodeError, TypeError) as error:
+        raise ValidationError("Invalid JSON") from error
 
 
-def extract_first_json(text: str) -> Optional[Any]:
-    """Best-effort extractor for the first JSON object/array from free-form text."""
-    if not text:
-        return None
-
-    m = _FENCED_JSON_RE.search(text)
-    if m:
-        parsed = _try_load(m.group(1))
-        if parsed is not None:
-            return parsed
-
-    m2 = _FIRST_JSON_OBJ_RE.search(text)
-    if m2:
-        parsed = _try_load(m2.group(0))
-        if parsed is not None:
-            return parsed
-
-    m3 = _FIRST_JSON_ARR_RE.search(text)
-    if m3:
-        parsed = _try_load(m3.group(0))
-        if parsed is not None:
-            return parsed
-
+def extract_first_json(text: str) -> Any:
+    if not isinstance(text, str):
+        raise ValidationError("Model response must be text")
+    decoder = json.JSONDecoder(parse_constant=_constant, object_pairs_hook=_pairs)
+    for position, character in enumerate(text):
+        if character in "{[":
+            try:
+                value, _ = decoder.raw_decode(text[position:])
+                return value
+            except json.JSONDecodeError:
+                continue
     return None
 
 
-def extract_first_json_object(text: str) -> Optional[Dict[str, Any]]:
-    parsed = extract_first_json(text)
-    if isinstance(parsed, dict):
-        return parsed
-    return None
+def extract_first_json_object(text: str) -> dict[str, Any] | None:
+    value = extract_first_json(text)
+    return value if isinstance(value, dict) else None
+
+
+def require_json_object(text: str) -> dict[str, Any]:
+    value = extract_first_json_object(text)
+    if value is None:
+        raise ValidationError("Model response contains no valid JSON object")
+    return value
 
 
 def truncate(text: str, max_chars: int) -> str:
-    if text is None:
-        return ""
-    if len(text) <= max_chars:
-        return text
-    return text[: max_chars - 1] + "…"
+    return text[:max(0, max_chars)]

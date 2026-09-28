@@ -1,126 +1,54 @@
+"""Five-keyframe brightness and structured visual extraction."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Dict, List, Optional, Protocol, Sequence, Tuple
+from typing import Any
 
-from ..llm.base import LLMClient
-from ..types import MultimodalInput
-from ..utils.image_utils import blur_score_variance_of_laplacian, load_image, smoothed_brightness, choose_keyframes
-
-
-class ObjectDetector(Protocol):
-    def detect_objects(self, image_paths: Sequence[str], mm: MultimodalInput) -> List[str]:
-        ...
+from ..config import OmniIntentsConfig
+from ..errors import ValidationError
+from ..llm.base import LLMClient, generate_json
+from ..prompts import request_for
+from ..types import MultimodalInput, PipelineTrace
+from ..utils.image_utils import choose_keyframes, smoothed_brightness
+from ..utils.validate import require_fields
 
 
-class ContextDetector(Protocol):
-    def detect_context(self, image_paths: Sequence[str], mm: MultimodalInput) -> Tuple[str, str]:
-        ...
-
-
-class HandEyeTargetDetector(Protocol):
-    def detect(self, image_paths: Sequence[str], mm: MultimodalInput) -> Tuple[str, str, str]:
-        ...
-
-
-@dataclass
-class InjectedObjectDetector:
-    def detect_objects(self, image_paths: Sequence[str], mm: MultimodalInput) -> List[str]:
-        return mm.objects or []
-
-
-@dataclass
-class InjectedContextDetector:
-    def detect_context(self, image_paths: Sequence[str], mm: MultimodalInput) -> Tuple[str, str]:
-        return (mm.context_location or "unknown", mm.context_activity or "unknown")
-
-
-@dataclass
-class InjectedHandEyeTargetDetector:
-    def detect(self, image_paths: Sequence[str], mm: MultimodalInput) -> Tuple[str, str, str]:
-        return (mm.hand_state or "unknown", mm.eye_state or "unknown", mm.interaction_target or "unknown")
-
-
-@dataclass
 class VisualProcessor:
-    """Extract visual information into structured text fields (paper 6.1.1.1).
+    def __init__(self, llm: LLMClient, config: OmniIntentsConfig | None = None):
+        self.llm = llm
+        self.config = config or OmniIntentsConfig()
 
-    Implemented fields:
-    - brightness: relative luminance (Eq.1) with temporal smoothing across 5 keyframes
-    - hand_state, eye_state, interaction_target (injected or detector)
-    - context: location/activity (injected or detector)
-    - objects: (injected or detector)
-    - optional: scene_description (via multimodal LLM)
-    - optional: image_quality (blur score) for debugging/extension (NOT used by default thresholds)
-    """
-
-    llm: LLMClient
-    object_detector: Optional[ObjectDetector] = None
-    context_detector: Optional[ContextDetector] = None
-    hand_eye_target_detector: Optional[HandEyeTargetDetector] = None
-
-    describe_with_llm: bool = True
-    max_describe_frames: int = 1  # keep low by default
-
-    def __post_init__(self) -> None:
-        self.object_detector = self.object_detector or InjectedObjectDetector()
-        self.context_detector = self.context_detector or InjectedContextDetector()
-        self.hand_eye_target_detector = self.hand_eye_target_detector or InjectedHandEyeTargetDetector()
-
-    def process(self, mm: MultimodalInput) -> Dict[str, object]:
-        image_paths: Sequence[str] = mm.image_paths or []
-        keyframes = choose_keyframes(image_paths, k=5) if image_paths else []
-        brightness = smoothed_brightness(keyframes, k=5) if keyframes else 0.0
-
-        # Optional quality metric on first frame
-        blur_score = None
-        if keyframes:
-            try:
-                img0 = load_image(keyframes[0])
-                blur_score = blur_score_variance_of_laplacian(img0.rgb)
-            except Exception:
-                blur_score = None
-
-        # Scene description (optional)
-        scene_description = ""
-        if self.describe_with_llm and keyframes:
-            prompt = (
-                "Describe the scene in detail, focusing on objects, context (location/activity), "
-                "and any interaction target the user may be referring to."
-            )
-            # Only describe a few frames to limit cost.
-            descs = []
-            for p in keyframes[: self.max_describe_frames]:
-                try:
-                    descs.append(self.llm.vision_describe(p, prompt, max_tokens=250).text.strip())
-                except Exception:
-                    continue
-            scene_description = "\n".join([d for d in descs if d])
-
-        # Detectors / injected metadata
-        objects = self.object_detector.detect_objects(keyframes, mm) if self.object_detector else (mm.objects or [])
-        loc, act = self.context_detector.detect_context(keyframes, mm) if self.context_detector else (
-            mm.context_location or "unknown",
-            mm.context_activity or "unknown",
-        )
-        hand_state, eye_state, target = self.hand_eye_target_detector.detect(keyframes, mm) if self.hand_eye_target_detector else (
-            mm.hand_state or "unknown",
-            mm.eye_state or "unknown",
-            mm.interaction_target or "unknown",
-        )
-
-        visual_text: Dict[str, object] = {
-            "brightness": {
-                "value": float(brightness),
-                "text": f"The current environmental brightness is {brightness:.3f}, on a scale of 0 to 1.",
-            },
-            "scene_description": scene_description,
-            "hand_state": hand_state,
-            "eye_state": eye_state,
-            "interaction_target": target,
-            "context": {"location": loc, "activity": act},
-            "objects": objects,
+    def process(self, data: MultimodalInput, trace: PipelineTrace | None = None) -> dict[str, Any]:
+        paths = choose_keyframes(data.image_paths)
+        extracted: dict[str, Any] = {}
+        brightness = data.brightness
+        if paths:
+            if brightness is None:
+                brightness = smoothed_brightness(paths)
+            request = request_for("vision", {"purpose": "structured multimodal input"}, self.config, paths)
+            extracted = generate_json(self.llm, request, self.config, trace)
+            fields = {"activity", "location", "objects", "eye_state", "eye_target",
+                      "hand_state", "hand_target", "scene_description"}
+            require_fields(extracted, fields)
+            if not isinstance(extracted["objects"], list) or not all(isinstance(item, str) for item in extracted["objects"]):
+                raise ValidationError("Vision objects must be a list of strings")
+            if any(extracted[field] is not None and not isinstance(extracted[field], str) for field in fields - {"objects"}):
+                raise ValidationError("Vision scalar fields must be string or null")
+        def choose(name: str, source_name: str | None = None) -> Any:
+            supplied = getattr(data, name)
+            return supplied if supplied is not None else extracted.get(source_name or name)
+        result = {
+            "status": "present" if paths or any(value is not None for value in (
+                data.objects, data.brightness, data.context_location, data.context_activity,
+                data.hand_state, data.eye_state, data.hand_target, data.eye_target,
+            )) else "missing",
+            "brightness": brightness,
+            "brightness_method": "paper_linear_RGB_equation",
+            "keyframe_count": len(paths),
+            "context": {"location": choose("context_location", "location"), "activity": choose("context_activity", "activity")},
+            "objects": choose("objects") or [],
+            "hand_state": choose("hand_state"), "hand_target": choose("hand_target"),
+            "eye_state": choose("eye_state"), "eye_target": choose("eye_target"),
+            "scene_description": choose("scene_description"),
         }
-        if blur_score is not None:
-            visual_text["image_quality"] = {"blur_score_var_laplacian": float(blur_score)}
-        return visual_text
+        return result

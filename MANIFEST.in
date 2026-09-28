@@ -1,0 +1,6 @@
+include requirements.lock
+include CHANGELOG.md
+recursive-include docs *.md
+recursive-include tests *.py
+recursive-include tools *.py
+recursive-include omniintents/data *.json *.jsonl

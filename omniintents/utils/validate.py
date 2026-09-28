@@ -1,101 +1,92 @@
+"""Validate semantic model contracts before constructing runtime objects."""
+
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
-from ..types import AgentType, Capability
+from ..errors import ValidationError
+from ..types import AgentType, Capability, Intent, TaskPlan, TaskStep
 
 
-def as_float(x: Any, default: float = 0.0) -> float:
+def require_fields(data: Any, required: set[str], optional: set[str] | None = None) -> dict[str, Any]:
+    if not isinstance(data, dict):
+        raise ValidationError("Expected a JSON object")
+    if required - data.keys():
+        raise ValidationError(f"Missing fields: {sorted(required - data.keys())}")
+    if data.keys() - required - (optional or set()):
+        raise ValidationError(f"Unexpected fields: {sorted(data.keys() - required - (optional or set()))}")
+    return data
+
+
+def nonempty_string(value: Any, name: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValidationError(f"{name} must be a non-empty string")
+    return value.strip()
+
+
+def parse_intents(data: Any) -> tuple[list[Intent], str, str]:
+    require_fields(data, {"candidates", "complementarity", "ambiguity"}, {"evidence_summary"})
+    if not isinstance(data.get("evidence_summary", ""), str):
+        raise ValidationError("evidence_summary must be a string")
+    if not isinstance(data["complementarity"], str) or data["complementarity"] not in {"complementary", "non_complementary", "unknown"}:
+        raise ValidationError("Invalid complementarity")
+    if not isinstance(data["ambiguity"], str) or data["ambiguity"] not in {"ambiguous", "unambiguous", "unknown"}:
+        raise ValidationError("Invalid ambiguity")
+    if not isinstance(data["candidates"], list) or len(data["candidates"]) > 3:
+        raise ValidationError("Expected zero to three intent candidates")
+    intents = []
+    descriptions = set()
+    for value in data["candidates"]:
+        require_fields(value, {"specific_label", "description", "confidence"}, {"general_label"})
+        intent = Intent(**value)
+        if intent.description.casefold() in descriptions:
+            raise ValidationError("Duplicate intent candidate")
+        descriptions.add(intent.description.casefold())
+        intents.append(intent)
+    if len(intents) > 1 and data["ambiguity"] == "unambiguous":
+        raise ValidationError("Multiple candidates cannot be unambiguous")
+    intents.sort(key=lambda intent: -intent.confidence)
+    return intents, data["complementarity"], data["ambiguity"]
+
+
+def parse_capabilities(values: Any) -> list[Capability]:
+    if not isinstance(values, list) or not values:
+        raise ValidationError("required_capabilities must be a non-empty list")
     try:
-        return float(x)
-    except Exception:
-        return default
+        return list(dict.fromkeys(Capability(value) for value in values))
+    except (ValueError, TypeError) as error:
+        raise ValidationError("Unknown capability") from error
 
 
-def as_bool(x: Any, default: bool = False) -> bool:
-    if isinstance(x, bool):
-        return x
-    if isinstance(x, (int, float)):
-        return bool(x)
-    if isinstance(x, str):
-        t = x.strip().lower()
-        if t in {"true", "yes", "y", "1"}:
-            return True
-        if t in {"false", "no", "n", "0"}:
-            return False
-    return default
+def parse_task_plan(data: Any) -> TaskPlan:
+    require_fields(data, {"goal", "steps"})
+    goal = nonempty_string(data["goal"], "goal")
+    if not isinstance(data["steps"], list) or not data["steps"]:
+        raise ValidationError("Task plan requires non-empty steps")
+    steps = []
+    for position, value in enumerate(data["steps"], 1):
+        require_fields(value, {"step_id", "instruction", "required_capabilities"})
+        if type(value["step_id"]) is not int or value["step_id"] != position:
+            raise ValidationError("step_id must be consecutive integers starting at one")
+        steps.append(TaskStep(
+            position, nonempty_string(value["instruction"], "instruction"),
+            parse_capabilities(value["required_capabilities"]),
+        ))
+    return TaskPlan(goal, steps)
 
 
-def validate_intent_json(data: Any) -> Tuple[bool, List[str]]:
-    errors: List[str] = []
-    if not isinstance(data, dict):
-        return False, ["Intent JSON must be an object."]
-    if not isinstance(data.get("label"), str) or not data["label"].strip():
-        errors.append("Missing/invalid 'label'.")
-    if not isinstance(data.get("description"), str):
-        errors.append("Missing/invalid 'description'.")
-    conf = data.get("confidence", 0.5)
+def parse_agent(data: Any) -> tuple[AgentType, str]:
+    require_fields(data, {"agent_type", "rationale"})
     try:
-        float(conf)
-    except Exception:
-        errors.append("Invalid 'confidence' (must be number).")
-    # entities optional
-    ent = data.get("entities", {})
-    if ent is not None and not isinstance(ent, dict):
-        errors.append("'entities' must be an object if provided.")
-    # requires_* optional
-    return len(errors) == 0, errors
+        agent = AgentType(data["agent_type"])
+    except (ValueError, TypeError) as error:
+        raise ValidationError("Unknown agent type") from error
+    return agent, nonempty_string(data["rationale"], "rationale")
 
 
-def validate_task_plan_json(data: Any) -> Tuple[bool, List[str]]:
-    errors: List[str] = []
-    if not isinstance(data, dict):
-        return False, ["Task plan JSON must be an object."]
-    if not isinstance(data.get("goal"), str) or not data["goal"].strip():
-        errors.append("Missing/invalid 'goal'.")
-    steps = data.get("steps")
-    if not isinstance(steps, list) or not steps:
-        errors.append("Missing/invalid 'steps' (must be non-empty list).")
-        return False, errors
-    for i, s in enumerate(steps):
-        if not isinstance(s, dict):
-            errors.append(f"Step {i} must be an object.")
-            continue
-        if "step_id" not in s:
-            errors.append(f"Step {i} missing 'step_id'.")
-        if not isinstance(s.get("instruction"), str) or not s["instruction"].strip():
-            errors.append(f"Step {i} missing/invalid 'instruction'.")
-        caps = s.get("required_capabilities", [])
-        if caps is not None and not isinstance(caps, list):
-            errors.append(f"Step {i} 'required_capabilities' must be list.")
-    return len(errors) == 0, errors
-
-
-def validate_agent_json(data: Any, candidates: Optional[List[AgentType]] = None) -> Tuple[bool, List[str]]:
-    errors: List[str] = []
-    if not isinstance(data, dict):
-        return False, ["Agent JSON must be an object."]
-    if not isinstance(data.get("agent_type"), str) or not data["agent_type"].strip():
-        errors.append("Missing/invalid 'agent_type'.")
-    else:
-        try:
-            agent = AgentType(data["agent_type"])
-            if candidates is not None and agent not in candidates:
-                errors.append(f"'agent_type' must be one of candidates: {[c.value for c in candidates]}.")
-        except Exception:
-            errors.append(f"Unknown agent_type: {data.get('agent_type')!r}.")
-    if not isinstance(data.get("rationale", ""), str):
-        errors.append("Invalid 'rationale' (must be string).")
-    return len(errors) == 0, errors
-
-
-def parse_capabilities(raw_list: Any) -> List[Capability]:
-    if not isinstance(raw_list, list):
-        return []
-    out: List[Capability] = []
-    for c in raw_list:
-        try:
-            out.append(Capability(str(c)))
-        except Exception:
-            continue
-    return out
+def parse_flags(data: Any) -> dict[str, bool]:
+    names = {"speech_expression", "visual_expression", "physical_interaction", "creativity"}
+    require_fields(data, names)
+    if any(type(value) is not bool for value in data.values()):
+        raise ValidationError("Explicit decision flags must be JSON booleans")
+    return data

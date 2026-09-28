@@ -1,0 +1,46 @@
+name: Reproducible delivery
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      PROJECT_PYTHON: ${{ matrix.os == 'windows-latest' && '.venv/Scripts/python.exe' || '.venv/bin/python' }}
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: requirements.lock
+      - name: Install isolated locked environment
+        run: |
+          python -m venv .venv
+          "$PROJECT_PYTHON" -m pip install --timeout 120 -r requirements.lock
+          "$PROJECT_PYTHON" -m pip install --no-deps --no-build-isolation -e .
+          "$PROJECT_PYTHON" -m pip check
+      - name: Run regression and protocol tests
+        run: |
+          "$PROJECT_PYTHON" -m pytest -q
+          "$PROJECT_PYTHON" -m omniintents reproduce --suite ablations --out runs/ci
+      - name: Build and verify outside the source tree
+        run: |
+          "$PROJECT_PYTHON" -m build --no-isolation
+          "$PROJECT_PYTHON" tools/verify_distribution.py

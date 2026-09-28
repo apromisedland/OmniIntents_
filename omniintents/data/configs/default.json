@@ -1,0 +1,11 @@
+{
+  "history_rounds": 2,
+  "max_history_entries": 5,
+  "cbas_enabled": true,
+  "ifas_enabled": true,
+  "agent_strategy": "implicit",
+  "failure_policy": "error",
+  "temperature": 0,
+  "seed": 0,
+  "enable_trace": false
+}

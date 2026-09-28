@@ -1,24 +1,33 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "omniintents"
-version = "0.2.0"
-description = "Enhanced reference implementation of an OmniIntents-like pipeline (IntentGPT/TaskGPT/AgentGPT)."
+version = "0.3.0"
+description = "Paper-aligned, auditable OmniIntents reference implementation and reproduction workflow."
 readme = "README.md"
-requires-python = ">=3.9"
-license = {file = "LICENSE"}
-authors = [{name = "OmniIntents Reference"}]
-
-dependencies = [
-  "numpy>=1.23",
-  "Pillow>=9.0",
-  "requests>=2.31",
-]
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "OmniIntents contributors"}]
+dependencies = ["numpy>=1.26,<3", "Pillow>=10.4,<13", "requests>=2.32,<3"]
 
 [project.optional-dependencies]
-optional = ["soundfile>=0.12", "librosa>=0.10", "torch>=2.0"]
+audio = ["soundfile>=0.13,<0.14"]
+google-speech = ["google-cloud-speech>=2.30,<3"]
+yamnet = ["tensorflow>=2.16,<2.21", "tensorflow-hub>=0.16,<0.17", "tf-keras>=2.16,<2.21"]
+dev = ["pytest>=8,<9", "build>=1.2,<2"]
+
+[project.scripts]
+omniintents = "omniintents.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["omniintents*"]
+
+[tool.setuptools.package-data]
+omniintents = ["data/*.json", "data/*.jsonl", "data/prompts/*.json", "data/configs/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

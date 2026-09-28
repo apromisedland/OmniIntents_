@@ -1,0 +1,30 @@
+[
+  {
+    "id": "supp-task-01",
+    "source": "Supplementary Material A.2",
+    "intent": "Cheers (Request Companion)",
+    "tasks": [
+      "Raise the glass",
+      "Toast with the user"
+    ]
+  },
+  {
+    "id": "supp-task-02",
+    "source": "Supplementary Material A.2",
+    "intent": "Introduce books on the bookshelf (Request Search/Recognition)",
+    "tasks": [
+      "Search online about the books on the bookshelf",
+      "Introduce the search results"
+    ]
+  },
+  {
+    "id": "supp-task-03",
+    "source": "Supplementary Material A.2",
+    "intent": "Bring the glass of water (Request Collaborator)",
+    "tasks": [
+      "Find the kettle",
+      "Find the cup and pour water",
+      "Pass the water"
+    ]
+  }
+]

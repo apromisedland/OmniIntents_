@@ -1,0 +1,42 @@
+[
+  {
+    "id": "supp-agent-01",
+    "source": "Supplementary Material A.3",
+    "tasks": [
+      "Find the kettle",
+      "Find the cup and pour water",
+      "Pass the water"
+    ],
+    "agent_type": "physical_agent",
+    "rationale": "Manipulating and passing objects requires physical interaction."
+  },
+  {
+    "id": "supp-agent-02",
+    "source": "Supplementary Material A.3",
+    "tasks": [
+      "Search online about food on the table",
+      "Introduce the search results"
+    ],
+    "agent_type": "voice_assistant",
+    "rationale": "Information retrieval and verbal presentation do not require embodied visual expression."
+  },
+  {
+    "id": "supp-agent-03",
+    "source": "Supplementary Material A.3",
+    "tasks": [
+      "Search for the location of a book",
+      "Navigate the user to the book"
+    ],
+    "agent_type": "ar_agent",
+    "rationale": "Visual navigation guidance and voice feedback do not require physical movement by a robot."
+  },
+  {
+    "id": "supp-agent-04",
+    "source": "Supplementary Material A.3",
+    "tasks": [
+      "Draw a flower using generative AI"
+    ],
+    "agent_type": "generative_ai_agent",
+    "rationale": "Creating new artwork requires generative capability."
+  }
+]

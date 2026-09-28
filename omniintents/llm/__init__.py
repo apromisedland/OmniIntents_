@@ -1,4 +1,4 @@
-from .base import LLMClient, LLMResult
+from .base import LLMClient, LLMRequest, LLMResult
 from .mock import MockLLMClient
 
-__all__ = ["LLMClient", "LLMResult", "MockLLMClient"]
+__all__ = ["LLMClient", "LLMRequest", "LLMResult", "MockLLMClient"]
